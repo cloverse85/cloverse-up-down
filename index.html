@@ -159,6 +159,8 @@
   .ec-cta.entered{background:#eafaf0;color:var(--green-deep);border-color:#bfe8c9}
   .ec-cta.entered:hover{filter:none}
   .ec-cta.off{opacity:.4;cursor:not-allowed} .ec-cta.off:hover{filter:none}
+  .ec-cta .cta-main{display:block;font-size:16px;font-weight:800;letter-spacing:-.2px}
+  .ec-cta .cta-sub{display:block;font-size:12px;font-weight:700;margin-top:3px;opacity:.72}
   .ec-cta .chg{margin-left:9px;font-size:13px;font-weight:700;color:var(--ink2);text-decoration:underline}
 
   /* QUICK mode presets */
@@ -350,10 +352,6 @@
           <div class="ec-meta">
             <span class="ec-usd" id="ecUsd">~$8.31</span><span class="ec-minbal"> · Min 30 CHZ · Balance 1,250 CHZ</span>
           </div>
-          <div class="ec-est">
-            <div><div class="k">Estimated win</div><div class="sub">Multiplier finalizes when round locks</div></div>
-            <span class="v up" id="estVal">172 CHZ</span>
-          </div>
           <button class="ec-cta up" id="ctaBtn" type="button" data-enter>↑ Enter Up · 100 CHZ</button>
         </div>
 
@@ -401,7 +399,6 @@
   function render(){
     $$('.oc').forEach(b=>b.classList.toggle('sel', b.dataset.dir===dir));
     const win=Math.round(amount*MULT[dir]);
-    const ev=$('#estVal'); ev.textContent=fmt(win)+' CHZ'; ev.className='v '+(dir==='up'?'up':'dn');
     $('#ecUsd').textContent='~$'+(amount*CHZ_USD).toFixed(2);
     const cta=$('#ctaBtn');
     if(done){
@@ -412,7 +409,7 @@
       cta.textContent='Min '+MIN+' CHZ to enter';
     } else {
       cta.className='ec-cta '+(dir==='up'?'up':'dn');
-      cta.textContent=(dir==='up'?'↑ Enter Up · ':'↓ Enter Down · ')+fmt(amount)+' CHZ';
+      cta.innerHTML='<span class="cta-main">'+(dir==='up'?'↑ Enter Up · ':'↓ Enter Down · ')+fmt(amount)+' CHZ</span><span class="cta-sub">Est. win '+fmt(win)+' CHZ</span>';
     }
     $('#modeQuick').className=(dir==='up'?'dir-up':'dir-down');
     $$('.qp').forEach(b=>{ const a=parseInt(b.dataset.amt,10); b.querySelector('.qw').textContent='win '+fmt(Math.round(a*MULT[dir]))+' CHZ'; });
