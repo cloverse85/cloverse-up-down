@@ -129,11 +129,11 @@
   .oc.dn.sel{background:rgba(239,68,68,.12);border-color:var(--red)}
 
   /* (4) amount */
-  .ec-amount{display:flex;align-items:baseline;justify-content:space-between;margin-top:18px}
-  .ec-amount .lab{font-size:15px;font-weight:600;color:var(--ink)}
-  .ec-amount .val{display:flex;align-items:baseline;gap:6px}
-  .ec-amount input{border:0;outline:0;background:transparent;font-family:var(--font);font-size:26px;font-weight:800;color:var(--ink);width:130px;text-align:right;padding:0}
-  .ec-amount .unit{font-size:13px;font-weight:700;color:var(--ink3)}
+  .ec-amt-lab{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--ink3);text-transform:uppercase;margin-top:18px}
+  .ec-inputbox{display:flex;align-items:center;gap:8px;background:var(--soft);border:1.5px solid var(--hairline);border-radius:12px;padding:0 16px;height:56px;margin-top:8px;transition:border-color .15s,background .15s,box-shadow .15s}
+  .ec-inputbox:focus-within{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(255,59,71,.1)}
+  .ec-inputbox input{border:0;outline:0;background:transparent;width:100%;font-family:var(--font);font-size:26px;font-weight:800;color:var(--ink);padding:0}
+  .ec-inputbox .unit{font-size:14px;font-weight:700;color:var(--ink3)}
   .ec-meta{text-align:right;margin-top:11px}
   .ec-usd{font-size:14px;font-weight:700;color:var(--ink2)}
   .ec-minbal{font-size:11px;color:var(--ink3);margin-top:2px}
@@ -337,9 +337,10 @@
 
         <!-- mode A · CUSTOM -->
         <div id="modeCustom">
-          <div class="ec-amount">
-            <span class="lab">Amount</span>
-            <span class="val"><input id="amt" type="text" value="100" inputmode="numeric" aria-label="Amount in CHZ" /><span class="unit">CHZ</span></span>
+          <label class="ec-amt-lab" for="amt">Amount (CHZ)</label>
+          <div class="ec-inputbox">
+            <input id="amt" type="text" value="100" inputmode="numeric" aria-label="Amount in CHZ" />
+            <span class="unit">CHZ</span>
           </div>
           <div class="ec-chips">
             <button type="button" data-add="10">+10</button><button type="button" data-add="50">+50</button>
