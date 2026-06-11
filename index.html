@@ -134,7 +134,9 @@
   .ec-amount .val{display:flex;align-items:baseline;gap:6px}
   .ec-amount input{border:0;outline:0;background:transparent;font-family:var(--font);font-size:26px;font-weight:800;color:var(--ink);width:130px;text-align:right;padding:0}
   .ec-amount .unit{font-size:13px;font-weight:700;color:var(--ink3)}
-  .ec-bal{text-align:right;font-size:11px;color:var(--ink3);margin-top:3px}
+  .ec-meta{text-align:right;margin-top:11px}
+  .ec-usd{font-size:14px;font-weight:700;color:var(--ink2)}
+  .ec-minbal{font-size:11px;color:var(--ink3);margin-top:2px}
 
   /* (5) quick chips */
   .ec-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
@@ -155,6 +157,7 @@
   .ec-cta.dn{background:var(--red);color:#fff}
   .ec-cta.entered{background:#eafaf0;color:var(--green-deep);border-color:#bfe8c9}
   .ec-cta.entered:hover{filter:none}
+  .ec-cta.off{opacity:.4;cursor:not-allowed} .ec-cta.off:hover{filter:none}
   .ec-cta .chg{margin-left:9px;font-size:13px;font-weight:700;color:var(--ink2);text-decoration:underline}
 
   /* QUICK mode presets */
@@ -338,10 +341,13 @@
             <span class="lab">Amount</span>
             <span class="val"><input id="amt" type="text" value="100" inputmode="numeric" aria-label="Amount in CHZ" /><span class="unit">CHZ</span></span>
           </div>
-          <div class="ec-bal" id="ecBal">≈ $8.31 · Balance 1,250 CHZ</div>
           <div class="ec-chips">
             <button type="button" data-add="10">+10</button><button type="button" data-add="50">+50</button>
             <button type="button" data-add="100">+100</button><button type="button" data-max>Max</button>
+          </div>
+          <div class="ec-meta">
+            <div class="ec-usd" id="ecUsd">~$8.31</div>
+            <div class="ec-minbal">Min 30 CHZ · Balance 1,250 CHZ</div>
           </div>
           <div class="ec-est">
             <div><div class="k">Estimated win</div><div class="sub">Multiplier finalizes when round locks</div></div>
@@ -385,7 +391,7 @@
 <script>
 /* ENTER card — Custom (set amount) + Quick (one-tap presets), one card.  Deep-links: ?v=down ?v=quick ?v=confirmed */
 (function(){
-  const MULT={up:1.72,down:2.38}, BALANCE=1250, CHZ_USD=0.0831;
+  const MULT={up:1.72,down:2.38}, BALANCE=1250, CHZ_USD=0.0831, MIN=30;
   let amount=100, dir='up', mode='custom', done=false;
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const fmt=n=>n.toLocaleString('en-US');
@@ -395,11 +401,14 @@
     $$('.oc').forEach(b=>b.classList.toggle('sel', b.dataset.dir===dir));
     const win=Math.round(amount*MULT[dir]);
     const ev=$('#estVal'); ev.textContent=fmt(win)+' CHZ'; ev.className='v '+(dir==='up'?'up':'dn');
-    $('#ecBal').textContent='≈ $'+(amount*CHZ_USD).toFixed(2)+' · Balance '+fmt(BALANCE)+' CHZ';
+    $('#ecUsd').textContent='~$'+(amount*CHZ_USD).toFixed(2);
     const cta=$('#ctaBtn');
     if(done){
       cta.className='ec-cta entered';
       cta.innerHTML='✓ Entered '+fmt(amount)+' CHZ on '+(dir==='up'?'Up':'Down')+' <span class="chg">Change</span>';
+    } else if(amount<MIN){
+      cta.className='ec-cta '+(dir==='up'?'up':'dn')+' off';
+      cta.textContent='Min '+MIN+' CHZ to enter';
     } else {
       cta.className='ec-cta '+(dir==='up'?'up':'dn');
       cta.textContent=(dir==='up'?'↑ Enter Up · ':'↓ Enter Down · ')+fmt(amount)+' CHZ';
@@ -419,7 +428,7 @@
     $$('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
     $('#modeCustom').hidden=m!=='custom'; $('#modeQuick').hidden=m!=='quick';
   }
-  function confirm(){ done=true; card.classList.add('confirmed'); render(); }
+  function confirm(){ if(amount<MIN) return; done=true; card.classList.add('confirmed'); render(); }
   function reset(){ done=false; card.classList.remove('confirmed'); render(); }
 
   $$('[data-dir]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; dir=b.dataset.dir; render(); }));
