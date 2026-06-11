@@ -176,10 +176,8 @@
   .ec-qnote{font-size:10px;color:var(--ink3);text-align:center;margin-top:11px}
 
   /* confirmed banner */
-  .ec-confirm{display:flex;align-items:center;gap:11px;background:#eafaf0;border:1px solid #cdeed6;border-radius:10px;padding:12px 14px;margin-top:14px}
-  .ec-confirm .ok{width:24px;height:24px;border-radius:99px;flex:none;background:var(--green);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
-  .ec-confirm .txt{font-size:13px;color:var(--ink);font-weight:600;line-height:1.3}
-  .ec-confirm .chg{margin-left:auto;background:none;border:0;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);text-decoration:underline;flex:none}
+  #modeQuick.dir-up .qp.sel{border-color:var(--green);background:rgba(34,197,94,.12)}
+  #modeQuick.dir-down .qp.sel{border-color:var(--red);background:rgba(239,68,68,.12)}
 
   /* ----- footer ----- */
   footer.app{height:60px;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 32px;margin-top:auto}
@@ -366,13 +364,6 @@
           <div class="ec-qnote">Multiplier finalizes when round locks</div>
         </div>
 
-        <!-- confirmed state (card lights green) -->
-        <div class="ec-confirm" id="ecConfirm" hidden>
-          <span class="ok">✓</span>
-          <span class="txt" id="ecConfirmTxt">Entered 100 CHZ on Up · est. 172 CHZ</span>
-          <button class="chg" type="button" data-change>Change</button>
-        </div>
-
       </div>
 
     </aside>
@@ -391,7 +382,7 @@
 /* ENTER card — Custom (set amount) + Quick (one-tap presets), one card.  Deep-links: ?v=down ?v=quick ?v=confirmed */
 (function(){
   const MULT={up:1.72,down:2.38}, BALANCE=1250, CHZ_USD=0.0831, MIN=30;
-  let amount=100, dir='up', mode='custom', done=false;
+  let amount=100, dir='up', mode='custom', done=false, quickSel=null;
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const fmt=n=>n.toLocaleString('en-US');
   const card=$('#enterCard');
@@ -412,9 +403,7 @@
       cta.innerHTML='<span class="cta-main">'+(dir==='up'?'↑ Enter Up · ':'↓ Enter Down · ')+fmt(amount)+' CHZ</span><span class="cta-sub">Est. win '+fmt(win)+' CHZ</span>';
     }
     $('#modeQuick').className=(dir==='up'?'dir-up':'dir-down');
-    $$('.qp').forEach(b=>{ const a=parseInt(b.dataset.amt,10); b.querySelector('.qw').textContent='win '+fmt(Math.round(a*MULT[dir]))+' CHZ'; });
-    const cf=$('#ecConfirm'); cf.hidden=!(done && mode==='quick');
-    if(done) $('#ecConfirmTxt').textContent='Entered '+fmt(amount)+' CHZ on '+(dir==='up'?'Up':'Down')+' · est. '+fmt(win)+' CHZ';
+    $$('.qp').forEach(b=>{ const a=parseInt(b.dataset.amt,10); b.classList.toggle('sel', a===quickSel); b.querySelector('.qw').textContent='win '+fmt(Math.round(a*MULT[dir]))+' CHZ'; });
   }
   function setAmount(v, fromInput){
     amount=Math.max(0,Math.min(BALANCE,Math.floor(v||0)));
@@ -434,9 +423,8 @@
   $$('[data-add]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; setAmount(amount+parseInt(b.dataset.add,10)); }));
   $$('[data-max]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; setAmount(BALANCE); }));
   $('#amt').addEventListener('input',e=>{ if(done)return; setAmount(parseInt(e.target.value.replace(/[^0-9]/g,''),10), true); });
-  $$('.qp').forEach(b=>b.addEventListener('click',()=>{ if(done)return; amount=parseInt(b.dataset.amt,10); confirm(); }));
+  $$('.qp').forEach(b=>b.addEventListener('click',()=>{ const a=parseInt(b.dataset.amt,10); quickSel=a; amount=a; render(); }));
   $('#ctaBtn').addEventListener('click',()=>{ done ? reset() : confirm(); });
-  $$('[data-change]').forEach(b=>b.addEventListener('click',reset));
 
   const v=new URLSearchParams(location.search).get('v');
   if(v==='down') dir='down';
