@@ -136,7 +136,8 @@
   .ec-inputbox .unit{font-size:14px;font-weight:700;color:var(--ink3)}
   .ec-meta{text-align:right;margin-top:11px}
   .ec-usd{font-size:14px;font-weight:700;color:var(--ink2)}
-  .ec-minbal{font-size:11px;color:var(--ink3);margin-top:2px}
+  .ec-minbal{font-size:12px;font-weight:600;color:var(--ink3);display:none}
+  .ec-inputbox:focus-within ~ .ec-meta .ec-minbal{display:inline}
 
   /* (5) quick chips */
   .ec-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
@@ -347,8 +348,7 @@
             <button type="button" data-add="100">+100</button><button type="button" data-max>Max</button>
           </div>
           <div class="ec-meta">
-            <div class="ec-usd" id="ecUsd">~$8.31</div>
-            <div class="ec-minbal">Min 30 CHZ · Balance 1,250 CHZ</div>
+            <span class="ec-usd" id="ecUsd">~$8.31</span><span class="ec-minbal"> · Min 30 CHZ · Balance 1,250 CHZ</span>
           </div>
           <div class="ec-est">
             <div><div class="k">Estimated win</div><div class="sub">Multiplier finalizes when round locks</div></div>
