@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloverse — CHZ Up &amp; Down</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* ----- design tokens (light — matches live cloverse.org) ----- */
+  :root{
+    --cream:#f4f1eb; --white:#ffffff;
+    --ink:#15161a; --ink2:#6b7280; --ink3:#9aa0a8;
+    --hairline:#eceae4; --soft:#f6f4ef;
+    --green:#22c55e; --green-deep:#16a34a; --green-ink:#04230f;
+    --red:#ef4444; --brand:#ff3b47;
+    --radius-card:24px; --radius-card-sm:20px; --radius-md:10px;
+    --shadow:0 1px 2px rgba(17,17,20,.04), 0 10px 30px rgba(17,17,20,.05);
+    --font:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--cream);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.4;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  .frame{max-width:1440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+  /* ----- header (full-width, like live) ----- */
+  header.app{height:88px;flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:0 32px;background:var(--white);border-bottom:1px solid var(--hairline)}
+  .brand{display:flex;align-items:center;gap:48px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo .name{font-size:22px;font-weight:800;letter-spacing:-.4px;color:var(--ink)}
+  nav.primary{display:flex;align-items:center;gap:28px}
+  nav.primary a{position:relative;text-decoration:none;font-size:15px;font-weight:500;color:var(--ink2);padding:6px 0;transition:color .15s}
+  nav.primary a:hover{color:var(--ink)}
+  nav.primary a.active{color:var(--ink);font-weight:600}
+  nav.primary a.active::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;border-radius:99px;background:var(--brand)}
+  .wallet{display:flex;align-items:center;gap:10px;height:44px;padding:6px 14px 6px 6px;background:var(--white);
+    border:1px solid var(--hairline);border-radius:999px;cursor:pointer;transition:border-color .15s}
+  .wallet:hover{border-color:#dcd8cf}
+  .coin{width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ff4d8d,#e62934)}
+  .wallet .bal{font-size:15px;font-weight:600;color:var(--ink)}
+  .chev{color:var(--ink3)}
+
+  /* ----- layout ----- */
+  main{display:flex;gap:16px;padding:20px 32px 28px}
+  .col-left{flex:1 1 auto;min-width:0}
+  .col-right{flex:0 0 360px;width:360px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--white);border:1px solid var(--hairline);border-radius:var(--radius-card-sm);box-shadow:var(--shadow)}
+  .card-lg{border-radius:var(--radius-card);padding:24px}
+  .card-pad{padding:16px}
+
+  /* ----- left: title + lock ----- */
+  .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:18px}
+  h1.title{margin:0;font-size:32px;font-weight:800;letter-spacing:-.6px;color:var(--ink)}
+  .subtitle{margin:6px 0 0;font-size:13px;color:var(--ink3)}
+  .lock{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--hairline);
+    border-radius:12px;padding:10px 14px;font-size:14px;white-space:nowrap}
+  .lock .k{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--ink3)}
+  .lock .from{color:var(--ink2);font-weight:600}
+  .lock .arr{color:var(--ink3)}
+  .lock .to{color:var(--ink);font-weight:700}
+  .lock .delta{color:var(--green-deep);font-weight:700}
+
+  /* ----- chart ----- */
+  .chart{background:#fcfbf8;border:1px solid var(--hairline);border-radius:16px;overflow:hidden}
+  .chart svg{display:block;width:100%;height:auto}
+
+  /* ----- right cards (live round) ----- */
+  .r-top{display:flex;align-items:flex-start;justify-content:space-between}
+  .live{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.4px;color:var(--red)}
+  .live .dot{width:7px;height:7px;border-radius:99px;background:var(--red);display:inline-block}
+  .rid{font-size:20px;font-weight:800;color:var(--ink);margin-top:6px}
+  .rid.sm{font-size:16px}
+  .cap{font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--ink3)}
+  .countdown{font-size:22px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px}
+  .countdown.sm{font-size:16px}
+  .ar{display:flex;flex-direction:column;align-items:flex-end}
+  .pool{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:14px}
+  .pool .pk{color:var(--ink3);font-weight:600}
+  .pool .pv{color:var(--ink);font-weight:700}
+  .mx{display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px}
+  .mx .lab{font-size:11px;font-weight:700;letter-spacing:.5px}
+  .mx .lab.up{color:var(--green-deep)} .mx .lab.dn{color:var(--red)}
+  .mx .val{font-size:15px;font-weight:800;color:var(--ink);margin-top:2px}
+  .ratio{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:10px}
+  .ratio .up{background:var(--green)} .ratio .dn{background:var(--red);flex:1}
+  .pct{display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-top:8px}
+  .pct .up{color:var(--green-deep)} .pct .dn{color:var(--red)}
+  .divider{border-top:1px solid var(--hairline);margin-top:16px;padding-top:14px;display:flex;align-items:flex-end;justify-content:space-between}
+  .pos-k{font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--ink3)}
+  .pos-v{font-size:14px;color:var(--ink3);margin-top:6px}
+  .pos-dash{font-size:18px;color:var(--ink3)}
+
+  /* ===== ENTER card — Polymarket composition, light Cloverse style ===== */
+  [hidden]{display:none!important}
+  .enter-card{transition:border-color .2s,box-shadow .2s}
+  .enter-card.confirmed{border-color:#bfe8c9;box-shadow:0 0 0 1px #bfe8c9,0 10px 30px rgba(34,197,94,.12)}
+
+  /* (1) market header */
+  .ec-head{display:flex;align-items:center;gap:11px}
+  .ec-coin{width:34px;height:34px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ff4d8d,#e62934)}
+  .ec-id{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .ec-market{font-size:13px;font-weight:600;color:var(--ink2)}
+  .ec-side{font-size:13px;font-weight:700}
+  .ec-side.up{color:var(--green-deep)} .ec-side.dn{color:var(--red)}
+  .ec-round{margin-left:auto;text-align:right;display:flex;flex-direction:column;gap:2px}
+  .ec-round .t{font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .ec-rule{border:0;border-top:1px solid var(--hairline);margin:15px 0}
+
+  /* (2) stake-mode toggle — Custom (set amount) vs Quick (one-tap presets) */
+  .ec-modes{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .ec-modelab{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase}
+  .seg{display:inline-flex;background:var(--soft);border:1px solid var(--hairline);border-radius:999px;padding:3px}
+  .seg button{border:0;background:none;color:var(--ink2);font-family:var(--font);font-size:12px;font-weight:700;padding:6px 15px;border-radius:999px;cursor:pointer;transition:.12s}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--white);color:var(--ink);box-shadow:0 1px 2px rgba(17,17,20,.08)}
+
+  /* (3) outcome toggle */
+  .ec-outcomes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .oc{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 0;border-radius:14px;border:1.5px solid var(--hairline);background:var(--soft);cursor:pointer;font-family:var(--font);transition:.12s}
+  .oc .oc-l{font-size:13px;font-weight:700;letter-spacing:.2px}
+  .oc .oc-x{font-size:18px;font-weight:800;letter-spacing:-.3px}
+  .oc.up .oc-l,.oc.up .oc-x{color:var(--green-deep)} .oc.dn .oc-l,.oc.dn .oc-x{color:var(--red)}
+  .oc:hover{border-color:#dcd8cf}
+  /* selected = a clear "picked" state (tint + colored ring), NOT a solid action button */
+  .oc.up.sel{background:rgba(34,197,94,.12);border-color:var(--green)}
+  .oc.dn.sel{background:rgba(239,68,68,.12);border-color:var(--red)}
+  .oc.sel::after{content:"✓";position:absolute;top:7px;right:9px;font-size:11px;font-weight:800}
+  .oc.up.sel::after{color:var(--green-deep)} .oc.dn.sel::after{color:var(--red)}
+
+  /* (4) amount */
+  .ec-amount{display:flex;align-items:baseline;justify-content:space-between;margin-top:18px}
+  .ec-amount .lab{font-size:15px;font-weight:600;color:var(--ink)}
+  .ec-amount .val{display:flex;align-items:baseline;gap:6px}
+  .ec-amount input{border:0;outline:0;background:transparent;font-family:var(--font);font-size:26px;font-weight:800;color:var(--ink);width:130px;text-align:right;padding:0}
+  .ec-amount .unit{font-size:13px;font-weight:700;color:var(--ink3)}
+  .ec-bal{text-align:right;font-size:11px;color:var(--ink3);margin-top:3px}
+
+  /* (5) quick chips */
+  .ec-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .ec-chips button{border:1px solid var(--hairline);background:var(--soft);color:var(--ink2);font-family:var(--font);font-size:13px;font-weight:700;padding:9px 0;border-radius:10px;cursor:pointer;transition:.12s}
+  .ec-chips button:hover{background:#efece4;color:var(--ink)}
+
+  /* estimated win — Cloverse parimutuel detail */
+  .ec-est{display:flex;align-items:center;justify-content:space-between;background:var(--soft);border-radius:10px;padding:11px 14px;margin-top:14px}
+  .ec-est .k{font-size:12px;color:var(--ink2);font-weight:600}
+  .ec-est .sub{font-size:10px;color:var(--ink3);margin-top:2px}
+  .ec-est .v{font-size:15px;font-weight:800}
+  .ec-est .v.up{color:var(--green-deep)} .ec-est .v.dn{color:var(--red)}
+
+  /* (6) single CTA — pill, like the existing enter buttons */
+  .ec-cta{width:100%;margin-top:14px;border:0;border-radius:999px;padding:14px 0;font-family:var(--font);font-size:16px;font-weight:800;letter-spacing:-.2px;cursor:pointer;transition:filter .15s,transform .05s}
+  .ec-cta:hover{filter:brightness(1.05)} .ec-cta:active{transform:translateY(1px)}
+  .ec-cta.up{background:var(--green);color:var(--green-ink)}
+  .ec-cta.dn{background:var(--red);color:#fff}
+
+  /* QUICK mode presets */
+  .ec-qlabel{font-size:12px;font-weight:600;color:var(--ink2);margin:18px 0 10px}
+  .ec-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .qp{display:flex;flex-direction:column;align-items:center;gap:4px;padding:15px 0;border-radius:14px;border:1px solid var(--hairline);background:var(--soft);cursor:pointer;font-family:var(--font);transition:.12s}
+  .qp .qa{font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-.3px}
+  .qp .qa i{font-size:12px;font-weight:700;color:var(--ink3);font-style:normal;margin-left:3px}
+  .qp .qw{font-size:11px;font-weight:700}
+  #modeQuick.dir-up .qp .qw{color:var(--green-deep)} #modeQuick.dir-down .qp .qw{color:var(--red)}
+  #modeQuick.dir-up .qp:hover{border-color:var(--green);background:#fff;box-shadow:0 0 0 1px rgba(34,197,94,.25)}
+  #modeQuick.dir-down .qp:hover{border-color:var(--red);background:#fff;box-shadow:0 0 0 1px rgba(239,68,68,.25)}
+  .ec-qnote{font-size:10px;color:var(--ink3);text-align:center;margin-top:11px}
+
+  /* confirmed banner */
+  .ec-confirm{display:none;align-items:center;gap:11px;background:#eafaf0;border:1px solid #cdeed6;border-radius:10px;padding:12px 14px;margin-top:14px}
+  .enter-card.confirmed .ec-confirm{display:flex}
+  .ec-confirm .ok{width:24px;height:24px;border-radius:99px;flex:none;background:var(--green);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .ec-confirm .txt{font-size:13px;color:var(--ink);font-weight:600;line-height:1.3}
+  .ec-confirm .chg{margin-left:auto;background:none;border:0;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);text-decoration:underline;flex:none}
+
+  /* ----- footer ----- */
+  footer.app{height:60px;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 32px;margin-top:auto}
+  footer.app a{width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:.15s}
+  footer.app a:hover{background:var(--soft);color:var(--ink2)}
+
+  @media (max-width:920px){ main{flex-direction:column} .col-right{width:auto;flex-basis:auto} }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- ============ HEADER ============ -->
+  <header class="app">
+    <div class="brand">
+      <a class="logo" href="#">
+        <svg width="30" height="30" viewBox="0 0 22 22" fill="#ff3b47" aria-hidden="true">
+          <path d="M11 2.83 14.77 6.6 11 10.37 7.23 6.6Z"/><path d="M15.4 7.23 19.17 11 15.4 14.77 11.63 11Z"/>
+          <path d="M11 11.63 14.77 15.4 11 19.17 7.23 15.4Z"/><path d="M6.6 7.23 10.37 11 6.6 14.77 2.83 11Z"/>
+        </svg>
+        <span class="name">Cloverse</span>
+      </a>
+      <nav class="primary">
+        <a href="#" class="active">Up &amp; Down</a>
+        <a href="#">Prediction Market</a>
+        <a href="#">Lottery</a>
+      </nav>
+    </div>
+    <button class="wallet">
+      <span class="coin">
+        <svg width="14" height="14" viewBox="0 0 22 22" fill="#fff" aria-hidden="true">
+          <path d="M11 2.83 14.77 6.6 11 10.37 7.23 6.6Z"/><path d="M15.4 7.23 19.17 11 15.4 14.77 11.63 11Z"/>
+          <path d="M11 11.63 14.77 15.4 11 19.17 7.23 15.4Z"/><path d="M6.6 7.23 10.37 11 6.6 14.77 2.83 11Z"/>
+        </svg>
+      </span>
+      <span class="bal">1,250 CHZ</span>
+      <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ---- LEFT : price panel ---- -->
+    <section class="col-left">
+      <div class="card card-lg">
+        <div class="head-row">
+          <div>
+            <h1 class="title">CHZ Up &amp; Down</h1>
+            <p class="subtitle">5-minute rounds · May 1 · 4:25–4:30 AM KST</p>
+          </div>
+          <div class="lock">
+            <span class="k">LOCK</span><span class="from">$0.0823</span><span class="arr">→</span>
+            <span class="to">$0.0831</span><span class="delta">↑ 0.97%</span>
+          </div>
+        </div>
+
+        <div class="chart">
+          <svg viewBox="0 0 986 600" preserveAspectRatio="none" role="img" aria-label="CHZ price chart">
+            <defs>
+              <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#22c55e" stop-opacity=".30"/>
+                <stop offset="1" stop-color="#22c55e" stop-opacity=".02"/>
+              </linearGradient>
+            </defs>
+            <rect x="658" y="8" width="328" height="512" fill="#22c55e" opacity=".045"/>
+            <line x1="329" y1="8" x2="329" y2="520" stroke="#ece9e2" stroke-width="1"/>
+            <line x1="658" y1="8" x2="658" y2="520" stroke="#ece9e2" stroke-width="1"/>
+            <polygon fill="url(#fill)"
+              points="0,345 108,250 150,305 275,172 458,351 540,252 650,155 700,178 740,130 795,172 900,54 945,77 986,70 986,520 0,520"/>
+            <polyline fill="none" stroke="#22c55e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"
+              points="0,345 108,250 150,305 275,172 458,351 540,252 650,155 700,178 740,130 795,172 900,54 945,77 986,70"/>
+            <line x1="0" y1="314" x2="986" y2="314" stroke="#22c55e" stroke-width="1.4" stroke-dasharray="6 5" opacity=".7"/>
+            <g font-family="Inter, sans-serif" font-size="11" font-weight="500">
+              <g><rect x="8" y="114" width="66" height="22" rx="6" fill="#fff" stroke="#eceae4"/><text x="41" y="129" text-anchor="middle" fill="#6b7280">$0.0850</text></g>
+              <g><rect x="8" y="262" width="66" height="22" rx="6" fill="#fff" stroke="#eceae4"/><text x="41" y="277" text-anchor="middle" fill="#6b7280">$0.0830</text></g>
+              <g><rect x="8" y="412" width="66" height="22" rx="6" fill="#fff" stroke="#eceae4"/><text x="41" y="427" text-anchor="middle" fill="#6b7280">$0.0810</text></g>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="11" font-weight="700">
+              <rect x="8" y="303" width="150" height="22" rx="11" fill="#fff" stroke="#cdeed6"/>
+              <circle cx="24" cy="314" r="3.5" fill="#22c55e"/>
+              <text x="34" y="318" fill="#16a34a">LOCKED $0.0823</text>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="13" font-weight="800">
+              <circle cx="978" cy="70" r="5" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+              <rect x="892" y="40" width="86" height="28" rx="14" fill="#16a34a"/>
+              <text x="935" y="59" text-anchor="middle" fill="#fff">$0.0831</text>
+            </g>
+            <g font-family="Inter, sans-serif" text-anchor="middle">
+              <text x="178" y="560" font-size="13" fill="#9aa0a8">4:15</text>
+              <text x="178" y="582" font-size="13" font-weight="700" fill="#16a34a">↑ 1.92×</text>
+              <text x="500" y="560" font-size="13" fill="#9aa0a8">4:20</text>
+              <text x="500" y="582" font-size="13" font-weight="700" fill="#16a34a">↑ 2.04×</text>
+              <text x="822" y="560" font-size="13" fill="#9aa0a8">4:25</text>
+              <text x="822" y="582" font-size="13" font-weight="700" fill="#ef4444">● LIVE</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- RIGHT : live round + enter card ---- -->
+    <aside class="col-right">
+
+      <!-- live round (unchanged) -->
+      <div class="card card-pad">
+        <div class="r-top">
+          <div>
+            <span class="live"><span class="dot"></span>LIVE</span>
+            <div class="rid">Round #14,832</div>
+          </div>
+          <div class="ar"><span class="cap">RESOLVES IN</span><span class="countdown">02:36</span></div>
+        </div>
+        <div class="pool"><span class="pk">POOL</span><span class="pv">4,400 CHZ</span></div>
+        <div class="mx">
+          <div><div class="lab up">UP</div><div class="val">1.61×</div></div>
+          <div style="text-align:right"><div class="lab dn">DOWN</div><div class="val">2.63×</div></div>
+        </div>
+        <div class="ratio"><span class="up" style="width:59%"></span><span class="dn"></span></div>
+        <div class="pct"><span class="up">59% UP</span><span class="dn">41% DOWN</span></div>
+        <div class="divider">
+          <div><div class="pos-k">ENTERED</div><div class="pos-v">Not entered this round</div></div>
+          <div style="text-align:right"><div class="pos-k">EST. PAYOUT</div><div class="pos-dash">—</div></div>
+        </div>
+      </div>
+
+      <!-- ENTER card — Polymarket composition, light Cloverse design -->
+      <div class="card card-pad enter-card" id="enterCard">
+
+        <!-- (1) market header -->
+        <div class="r-top">
+          <div>
+            <span class="cap">NEXT ROUND</span>
+            <div class="rid sm">Round #14,833</div>
+          </div>
+          <div class="ar">
+            <span class="cap">OPENS IN</span>
+            <span class="countdown sm">02:36</span>
+          </div>
+        </div>
+
+        <div class="pool"><span class="pk">POOL</span><span class="pv">4,400 CHZ</span></div>
+
+        <hr class="ec-rule" />
+
+        <!-- (2) stake-mode toggle -->
+        <div class="ec-modes">
+          <span class="ec-modelab">Enter</span>
+          <div class="seg" role="tablist">
+            <button class="on" type="button" data-mode="custom">Custom</button>
+            <button type="button" data-mode="quick">Quick</button>
+          </div>
+        </div>
+
+        <!-- (3) outcome toggle — pick direction (shared) -->
+        <div class="ec-outcomes">
+          <button class="oc up sel" type="button" data-dir="up"><span class="oc-l">↑ UP</span><span class="oc-x">1.72×</span></button>
+          <button class="oc dn" type="button" data-dir="down"><span class="oc-l">↓ DOWN</span><span class="oc-x">2.38×</span></button>
+        </div>
+
+        <!-- mode A · CUSTOM -->
+        <div id="modeCustom">
+          <div class="ec-amount">
+            <span class="lab">Amount</span>
+            <span class="val"><input id="amt" type="text" value="100" inputmode="numeric" aria-label="Amount in CHZ" /><span class="unit">CHZ</span></span>
+          </div>
+          <div class="ec-bal">Balance · 1,250 CHZ</div>
+          <div class="ec-chips">
+            <button type="button" data-add="10">+10</button><button type="button" data-add="50">+50</button>
+            <button type="button" data-add="100">+100</button><button type="button" data-max>Max</button>
+          </div>
+          <div class="ec-est">
+            <div><div class="k">Estimated win</div><div class="sub">Multiplier finalizes when round locks</div></div>
+            <span class="v up" id="estVal">172 CHZ</span>
+          </div>
+          <button class="ec-cta up" id="ctaBtn" type="button" data-enter>↑ Enter Up · 100 CHZ</button>
+        </div>
+
+        <!-- mode B · QUICK -->
+        <div id="modeQuick" class="dir-up" hidden>
+          <div class="ec-qlabel">Quick enter · tap to stake instantly</div>
+          <div class="ec-presets">
+            <button class="qp" type="button" data-amt="100"><span class="qa">100<i>CHZ</i></span><span class="qw">win 172 CHZ</span></button>
+            <button class="qp" type="button" data-amt="250"><span class="qa">250<i>CHZ</i></span><span class="qw">win 430 CHZ</span></button>
+            <button class="qp" type="button" data-amt="500"><span class="qa">500<i>CHZ</i></span><span class="qw">win 860 CHZ</span></button>
+          </div>
+          <div class="ec-qnote">Multiplier finalizes when round locks</div>
+        </div>
+
+        <!-- confirmed state (card lights green) -->
+        <div class="ec-confirm" id="ecConfirm">
+          <span class="ok">✓</span>
+          <span class="txt" id="ecConfirmTxt">Entered 100 CHZ on Up · est. 172 CHZ</span>
+          <button class="chg" type="button" data-change>Change</button>
+        </div>
+
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="app">
+    <a href="#" aria-label="X / Twitter"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.53 3h3.02l-6.6 7.54L21.75 21h-6.07l-4.76-6.22L5.48 21H2.46l7.06-8.07L2.25 3h6.22l4.3 5.69L17.53 3Zm-1.06 16.18h1.67L7.6 4.73H5.8l10.67 14.45Z"/></svg></a>
+    <a href="#" aria-label="Telegram"><svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M21.94 4.6 18.6 20.3c-.25 1.1-.9 1.38-1.83.86l-5.06-3.73-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.16 9.4-8.5c.4-.36-.09-.57-.63-.2L4.16 13.1l-5-1.56c-1.08-.34-1.1-1.08.23-1.6l19.55-7.53c.9-.34 1.7.2 1.4 2.18Z"/></svg></a>
+    <a href="#" aria-label="Whitepaper"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg></a>
+  </footer>
+
+</div>
+
+<script>
+/* ENTER card — Custom (set amount) + Quick (one-tap presets), one card.  Deep-links: ?v=down ?v=quick ?v=confirmed */
+(function(){
+  const MULT={up:1.72,down:2.38}, BALANCE=1250;
+  let amount=100, dir='up', mode='custom', done=false;
+  const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+  const fmt=n=>n.toLocaleString('en-US');
+  const card=$('#enterCard');
+
+  function render(){
+    $$('.oc').forEach(b=>b.classList.toggle('sel', b.dataset.dir===dir));
+    const win=Math.round(amount*MULT[dir]);
+    const ev=$('#estVal'); ev.textContent=fmt(win)+' CHZ'; ev.className='v '+(dir==='up'?'up':'dn');
+    const cta=$('#ctaBtn'); cta.className='ec-cta '+(dir==='up'?'up':'dn');
+    cta.textContent=(dir==='up'?'↑ Enter Up · ':'↓ Enter Down · ')+fmt(amount)+' CHZ';
+    $('#modeQuick').className=(dir==='up'?'dir-up':'dir-down');
+    $$('.qp').forEach(b=>{ const a=parseInt(b.dataset.amt,10); b.querySelector('.qw').textContent='win '+fmt(Math.round(a*MULT[dir]))+' CHZ'; });
+  }
+  function setAmount(v, fromInput){
+    amount=Math.max(0,Math.min(BALANCE,Math.floor(v||0)));
+    if(!fromInput) $('#amt').value=amount?fmt(amount):'';
+    render();
+  }
+  function setMode(m){
+    mode=m;
+    $$('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+    $('#modeCustom').hidden=m!=='custom'; $('#modeQuick').hidden=m!=='quick';
+  }
+  function confirm(){
+    done=true; card.classList.add('confirmed'); $('#ctaBtn').hidden=true;
+    const win=Math.round(amount*MULT[dir]);
+    $('#ecConfirmTxt').textContent='Entered '+fmt(amount)+' CHZ on '+(dir==='up'?'Up':'Down')+' · est. '+fmt(win)+' CHZ';
+  }
+  function reset(){ done=false; card.classList.remove('confirmed'); $('#ctaBtn').hidden=(mode!=='custom'); render(); }
+
+  $$('[data-dir]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; dir=b.dataset.dir; render(); }));
+  $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; setMode(b.dataset.mode); }));
+  $$('[data-add]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; setAmount(amount+parseInt(b.dataset.add,10)); }));
+  $$('[data-max]').forEach(b=>b.addEventListener('click',()=>{ if(done)return; setAmount(BALANCE); }));
+  $('#amt').addEventListener('input',e=>{ if(done)return; setAmount(parseInt(e.target.value.replace(/[^0-9]/g,''),10), true); });
+  $$('.qp').forEach(b=>b.addEventListener('click',()=>{ if(done)return; amount=parseInt(b.dataset.amt,10); confirm(); }));
+  $$('[data-enter]').forEach(b=>b.addEventListener('click',confirm));
+  $$('[data-change]').forEach(b=>b.addEventListener('click',reset));
+
+  const v=new URLSearchParams(location.search).get('v');
+  if(v==='down') dir='down';
+  if(v==='quick') setMode('quick');
+  render();
+  if(v==='confirmed') confirm();
+})();
+</script>
+</body>
+</html>
