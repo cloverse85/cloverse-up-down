@@ -127,8 +127,6 @@
   /* selected = a clear "picked" state (tint + colored ring), NOT a solid action button */
   .oc.up.sel{background:rgba(34,197,94,.12);border-color:var(--green)}
   .oc.dn.sel{background:rgba(239,68,68,.12);border-color:var(--red)}
-  .oc.sel::after{content:"✓";position:absolute;top:7px;right:9px;font-size:11px;font-weight:800}
-  .oc.up.sel::after{color:var(--green-deep)} .oc.dn.sel::after{color:var(--red)}
 
   /* (4) amount */
   .ec-amount{display:flex;align-items:baseline;justify-content:space-between;margin-top:18px}
@@ -312,12 +310,10 @@
             <div class="rid sm">Round #14,833</div>
           </div>
           <div class="ar">
-            <span class="cap">OPENS IN</span>
-            <span class="countdown sm">02:36</span>
+            <span class="cap">POOL</span>
+            <div class="rid sm">4,400 CHZ</div>
           </div>
         </div>
-
-        <div class="pool"><span class="pk">POOL</span><span class="pv">4,400 CHZ</span></div>
 
         <hr class="ec-rule" />
 
@@ -342,7 +338,7 @@
             <span class="lab">Amount</span>
             <span class="val"><input id="amt" type="text" value="100" inputmode="numeric" aria-label="Amount in CHZ" /><span class="unit">CHZ</span></span>
           </div>
-          <div class="ec-bal">Balance · 1,250 CHZ</div>
+          <div class="ec-bal" id="ecBal">≈ $8.31 · Balance 1,250 CHZ</div>
           <div class="ec-chips">
             <button type="button" data-add="10">+10</button><button type="button" data-add="50">+50</button>
             <button type="button" data-add="100">+100</button><button type="button" data-max>Max</button>
@@ -389,7 +385,7 @@
 <script>
 /* ENTER card — Custom (set amount) + Quick (one-tap presets), one card.  Deep-links: ?v=down ?v=quick ?v=confirmed */
 (function(){
-  const MULT={up:1.72,down:2.38}, BALANCE=1250;
+  const MULT={up:1.72,down:2.38}, BALANCE=1250, CHZ_USD=0.0831;
   let amount=100, dir='up', mode='custom', done=false;
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const fmt=n=>n.toLocaleString('en-US');
@@ -399,6 +395,7 @@
     $$('.oc').forEach(b=>b.classList.toggle('sel', b.dataset.dir===dir));
     const win=Math.round(amount*MULT[dir]);
     const ev=$('#estVal'); ev.textContent=fmt(win)+' CHZ'; ev.className='v '+(dir==='up'?'up':'dn');
+    $('#ecBal').textContent='≈ $'+(amount*CHZ_USD).toFixed(2)+' · Balance '+fmt(BALANCE)+' CHZ';
     const cta=$('#ctaBtn');
     if(done){
       cta.className='ec-cta entered';
